@@ -3,10 +3,9 @@
 This repository contains reproducibility materials for the manuscript:
 
 > **Enhanced inference for distributions and quantiles of individual treatment effects in various experiments**  
-> **Manuscript ID:** JASA-T&M-2024-0594.R1
 
 It includes R code for:
-- Simulation studies in Section 6.1 and Appendix A3
+- Simulation studies in Appendix A3
 - Real data analyses in Sections 6.2 and 6.3
 - Inference for average treatment effects on a binary outcome in Appendix A1
 
@@ -16,7 +15,6 @@ It includes R code for:
 
 ```
 Enhanced_inference_for_ITE_quantiles/
-├── data/
 ├── scripts/
 │   ├── helpers/
 │   │   └── helper_functions.R
@@ -37,25 +35,15 @@ Enhanced_inference_for_ITE_quantiles/
 
 ## ⚙️ How to Set Up
 
-### 1. Clone the Repository
 
-```bash
-git clone https://github.com/Zhe-Chen-1999/Enhanced_inference_for_ITE_quantiles.git
-cd Enhanced_inference_for_ITE_quantiles
-```
-
-
-### 3. Load Required Data
+### Load Data
 
 These analyses use publicly available datasets:
 
 #### Education Experiment Data
 
-From the AER package:
-
 ```r
-library(AER)
-data("electric_teachers", package = "AER")
+data("electric_teachers", package = "RIQITE")
 ```
 
 #### Blood Cadmium Data
@@ -67,16 +55,14 @@ library(quantreg)
 data("cadmium", package = "quantreg")
 ```
 
-If you store these datasets locally instead, place them in the `data/` folder.
-
 ---
 
-### 4. Source Helper Functions
+### Source Helper Functions
 
 ✅ Before running any scripts, always source the helper functions:
 
 ```r
-source("scripts/helpers/helper_functions.R")
+source("helper_functions.R")
 ```
 
 ---
@@ -157,7 +143,7 @@ Run the scripts below **in this exact order** for full reproducibility:
 
 ---
 
-## 📊 Expected Outputs
+## Expected Outputs
 
 - **Appendix A1:**
   - Figure A1(a)-(b)
