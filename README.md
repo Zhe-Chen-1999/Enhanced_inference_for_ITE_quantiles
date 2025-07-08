@@ -33,12 +33,12 @@ Enhanced_inference_for_ITE_quantiles/
 
 ---
 
-## ⚙️ How to Set Up
+## Script Execution Order
 
 
 ### Source Helper Functions
 
-✅ Before running any scripts, always source the helper functions:
+Source the helper functions before running other scripts:
 
 ```r
 source("helper_functions.R")
@@ -46,7 +46,7 @@ source("helper_functions.R")
 
 ### Load Data
 
-These analyses use publicly available datasets:
+Real data analyses use publicly available datasets:
 
 #### Education Experiment Data
 
@@ -56,22 +56,40 @@ data("electric_teachers", package = "RIQITE")
 
 #### Blood Cadmium Data
 
-From the quantreg package:
-
 ```r
-library(quantreg)
 data("cadmium", package = "quantreg")
 ```
 
+### Run individual scripts
+
+Each script can be run independently. Scripts generate results corresponding to sections in the manuscript:
+- **`helper_functions.R`**: Utility functions for statistical analysis.
+- **`sim_section_A3`**: R code for simulation studies in Appendix A3.
+  **Outputs:**
+    - Figure A2
+    - Figure A4
+  Saved in `output/simulation_figures/`
+  
+- **`education_experiment_section_6.2`**:
+  Real data analysis for evaluating the effectiveness of professional development in Section 6.2.
+  **Outputs:**  
+    - Figure 1(a)-(c)  
+    - Figure 2(a)-(c)  
+    - Figure A5(a)-(c)  
+  Saved in `output/real_data_figures/education_experiment/`
+
+- **`blood_cadmium_section_6.3`**:
+  Real data analysis for evaluating the effect of smoking on the blood cadmium level in Section 6.3.
+   **Outputs:**  
+    - Figure 3(a)-(c)  
+    - Figure 4(a)-(c)  
+  Saved in `output/real_data_figures/blood_cadmium/`
+
+- **`education_experiment_section_A1`**:
+  Code for inference on average treatment effects on a binary outcome in Appendix A1.
+  **Outputs:** Figure A1(a)-(b) in `output/real_data_figures/education_experiment/`
 ---
 
-
-
----
-
-## ▶️ Script Execution Order
-
-Run the scripts below **in this exact order** for full reproducibility:
 
 ---
 
@@ -146,6 +164,22 @@ Run the scripts below **in this exact order** for full reproducibility:
 ---
 
 ## Expected Outputs
+
+| Script                      | Outputs                              |
+|-----------------------------|--------------------------------------|
+| simulation_section6_1.R     | Figures, Tables for Section 6.1      |
+| simulation_section6_2.R     | Figures, Tables for Section 6.2      |
+| simulation_appendix_A1.R    | Figures, Tables for Appendix A1      |
+| simulation_appendix_A3.R    | Figures, Tables for Appendix A3      |
+| `education_experiment_section_A1`      | Real data figures for Section 6.3 | 
+
+| Script                      | Outputs                              | Output Files                          |
+|-----------------------------|--------------------------------------|----------------------------------------|
+| simulation_section6_1.R     | Figures, Tables for Section 6.1      | Figure6_1.png, Table6_1.csv            |
+| simulation_section6_2.R     | Figures, Tables for Section 6.2      | Figure6_2.png, Table6_2.csv            |
+| simulation_appendix_A1.R    | Figures, Tables for Appendix A1      | AppendixA1_Figure.png, AppendixA1_Table.csv |
+| simulation_appendix_A3.R    | Figures, Tables for Appendix A3      | AppendixA3_Figure.png, AppendixA3_Table.csv |
+| real_data_section6_3.R      | Real data figures, Tables for Section 6.3 | output/real_data_figures/education_experiment/Figures_1{a,b,c}.png |
 
 - **Appendix A1:**
   - Figure A1(a)-(b)
