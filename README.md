@@ -33,7 +33,7 @@ Enhanced_inference_for_ITE_quantiles/
 
 ---
 
-## Script Execution Order
+## Script Execution
 
 
 ### Source Helper Functions
@@ -62,7 +62,7 @@ data("cadmium", package = "quantreg")
 
 ### Run individual scripts
 
-Each script can be run independently. Scripts generate results corresponding to sections in the manuscript:
+Each script can be run independently after helper functions are loaded:
 - **`helper_functions.R`**: Utility functions for statistical analysis.
 - **`sim_section_A3`**: R code for simulation studies in Appendix A3.
   **Outputs:**
@@ -165,33 +165,17 @@ Each script can be run independently. Scripts generate results corresponding to 
 
 ## Expected Outputs
 
-| Script                      | Outputs                              |
-|-----------------------------|--------------------------------------|
-| simulation_section6_1.R     | Figures, Tables for Section 6.1      |
-| simulation_section6_2.R     | Figures, Tables for Section 6.2      |
-| simulation_appendix_A1.R    | Figures, Tables for Appendix A1      |
-| simulation_appendix_A3.R    | Figures, Tables for Appendix A3      |
-| `education_experiment_section_A1`      | Real data figures for Section 6.3 | 
 
-| Script                      | Outputs                              | Output Files                          |
+| Script                      | Outputs                              | Output File Path                         |
 |-----------------------------|--------------------------------------|----------------------------------------|
-| simulation_section6_1.R     | Figures, Tables for Section 6.1      | Figure6_1.png, Table6_1.csv            |
-| simulation_section6_2.R     | Figures, Tables for Section 6.2      | Figure6_2.png, Table6_2.csv            |
-| simulation_appendix_A1.R    | Figures, Tables for Appendix A1      | AppendixA1_Figure.png, AppendixA1_Table.csv |
-| simulation_appendix_A3.R    | Figures, Tables for Appendix A3      | AppendixA3_Figure.png, AppendixA3_Table.csv |
+| `sim_section_A3.R`     | Figure A2, Figure A4 for Appendix A3      |     |
+| `education_experiment_section_6.2.R`     | Figure 1(a)-(c), Figure 2(a)-(c) for Section 6.2, Figure A5(a)-(c) for Section 6.2      |            |
+| `blood_cadmium_section_6.3.R`    | Figure 3(a)-(c), Figure 4(a)-(c) for Section 6.3      |  ```
+    output/real_data_figures/blood_cadmium/
+    ``` |
+| `education_experiment_section_A1.R`    | Figure A1(a)-(b) for Appendix A1      |  |
 | real_data_section6_3.R      | Real data figures, Tables for Section 6.3 | output/real_data_figures/education_experiment/Figures_1{a,b,c}.png |
 
-- **Appendix A1:**
-  - Figure A1(a)-(b)
-
-- **Section 6.2:**
-  - Figure 1(a)-(c)
-  - Figure 2(a)-(c)
-  - Figure A5(a)-(c)
-
-- **Section 6.3:**
-  - Figure 3(a)-(c)
-  - Figure 4(a)-(c)
 
 ---
 
