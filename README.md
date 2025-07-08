@@ -32,6 +32,23 @@ Enhanced_inference_for_ITE_quantiles/
 ```
 ---
 
+## Data Sources
+
+Real data analyses use publicly available datasets:
+
+- Education Experiment Data
+
+```r
+data("electric_teachers", package = "RIQITE")
+```
+
+- Blood Cadmium Data
+
+```r
+data("cadmium", package = "quantreg")
+```
+---
+
 ## Script Execution
 
 ### Source Helper Functions
@@ -40,22 +57,6 @@ Source the helper functions before running other scripts:
 
 ```r
 source("helper_functions.R")
-```
-
-### Data Sources
-
-Real data analyses use publicly available datasets:
-
-#### Education Experiment Data
-
-```r
-data("electric_teachers", package = "RIQITE")
-```
-
-#### Blood Cadmium Data
-
-```r
-data("cadmium", package = "quantreg")
 ```
 
 ### Run individual scripts
@@ -74,12 +75,12 @@ Each script can be run independently after helper functions are loaded:
 ## Outputs
 
 
-| Script                      | Expected Outputs                | Output Directory                         |
-|-----------------------------|--------------------------------------|----------------------------------------|
-| `sim_section_A3.R`     | Figure A2, Figure A4 for Appendix A3      |  `output/simulation_figures/`   |
-| `education_experiment_section_6.2.R`     | Figure 1(a)-(c), Figure 2(a)-(c) for Section 6.2, Figure A5(a)-(c) for Section 6.2      |    `output/real_data_figures/education_experiment/` |
-| `blood_cadmium_section_6.3.R`    | Figure 3(a)-(c), Figure 4(a)-(c) for Section 6.3      |  `output/real_data_figures/blood_cadmium/` |
-| `education_experiment_section_A1.R`    | Figure A1(a)-(b) for Appendix A1      | `output/real_data_figures/education_experiment/`  |
+| Script                      | Manuscript Section | Expected Outputs                | Output Directory                         |
+|-----------------------------|--------------------------------------|----------------------------------------|----------------------------------------|
+| `sim_section_A3.R`     | Appendix A3| Figure A2, A4       |  `output/simulation_figures/`   |
+| `education_experiment_section_6.2.R`     | Section 6.2| Figure 1(a)-(c), Figure 2(a)-(c), Figure A5(a)-(c)      |    `output/real_data_figures/education_experiment/` |
+| `blood_cadmium_section_6.3.R`    | Section 6.3   | Figure 3(a)-(c), Figure 4(a)-(c)     |  `output/real_data_figures/blood_cadmium/` |
+| `education_experiment_section_A1.R`    | Appendix A1 | Figure A1(a)-(b)       | `output/real_data_figures/education_experiment/`  |
 
 
 ---
