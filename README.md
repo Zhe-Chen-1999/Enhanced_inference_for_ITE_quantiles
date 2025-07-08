@@ -24,10 +24,10 @@ Enhanced_inference_for_ITE_quantiles/
 │     ├── blood_cadmium_section_6.3.R
 │     └── education_experiment_section_A1.R
 ├── output/
-│   ├── simulation_figures/
-│   └── real_data_figures/
-│       ├── education experiment/
-│       └── blood cadmium/
+│     ├── simulation_figures/
+│     └── real_data_figures/
+│         ├── education experiment/
+│         └── blood cadmium/
 
 ```
 ---
@@ -51,15 +51,11 @@ data("cadmium", package = "QIoT")
 
 ## Script Execution
 
-### Source Helper Functions
-
 Source the helper functions before running other scripts:
 
 ```r
 source("helper_functions.R")
 ```
-
-### Run individual scripts
 
 Each script can be run independently after helper functions are loaded:
 - **`helper_functions.R`**: Contains utility functions for statistical analysis used across all scripts.
