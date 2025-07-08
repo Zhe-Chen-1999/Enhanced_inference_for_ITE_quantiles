@@ -36,6 +36,14 @@ Enhanced_inference_for_ITE_quantiles/
 ## ⚙️ How to Set Up
 
 
+### Source Helper Functions
+
+✅ Before running any scripts, always source the helper functions:
+
+```r
+source("helper_functions.R")
+```
+
 ### Load Data
 
 These analyses use publicly available datasets:
@@ -57,13 +65,7 @@ data("cadmium", package = "quantreg")
 
 ---
 
-### Source Helper Functions
 
-✅ Before running any scripts, always source the helper functions:
-
-```r
-source("helper_functions.R")
-```
 
 ---
 
