@@ -97,84 +97,30 @@ Each script can be run independently after helper functions are loaded:
 
 1. **Appendix A1 - Binary Outcome Inference**
 
-    **Script:**
-
-    ```
-    scripts/simulations/A1_Inference_for_average_treatment_effects_on_a_binary_outcome.R
-    ```
-
-    **Outputs:**
-
-    - Figure A1(a)-(b) saved in:
-      ```
-      output/real_data_figures/education_experiment/
-      ```
-
 2. **Section 6.1 & Appendix A3 - Simulation Studies**
-
-    **Script:**
 
     ```
     scripts/simulations/A3_simulation_studies.R
     ```
-
----
-
 ### ✅ Real Data Analyses
 
 3. **Section 6.2 - Evaluating the Effectiveness of Professional Development**
 
-    **Script:**
-
-    ```
-    scripts/simulations/Sec6.2_Evaluating_the_effectiveness_of_professional_development.R
-    ```
-
-    **Outputs:**
-
-    - Figure 1(a)-(c)
-    - Figure 2(a)-(c)
-    - Figure A5(a)-(c)
-
-    Saved in:
-
-    ```
-    output/real_data_figures/education_experiment/
-    ```
-
 4. **Section 6.3 - Effect of Smoking on Blood Cadmium Levels**
 
-    **Script:**
-
-    ```
-    scripts/simulations/Sec6.3_Effect_of_smoking_on_the_blood_cadmium_level.R
-    ```
-
-    **Outputs:**
-
-    - Figure 3(a)-(c)
-    - Figure 4(a)-(c)
-
-    Saved in:
-
-    ```
-    output/real_data_figures/blood_cadmium/
-    ```
+   
 
 ---
 
 ## Expected Outputs
 
 
-| Script                      | Outputs                              | Output File Path                         |
+| Script                      | Outputs                              | Output Directory                         |
 |-----------------------------|--------------------------------------|----------------------------------------|
-| `sim_section_A3.R`     | Figure A2, Figure A4 for Appendix A3      |     |
-| `education_experiment_section_6.2.R`     | Figure 1(a)-(c), Figure 2(a)-(c) for Section 6.2, Figure A5(a)-(c) for Section 6.2      |            |
-| `blood_cadmium_section_6.3.R`    | Figure 3(a)-(c), Figure 4(a)-(c) for Section 6.3      |  ```
-    output/real_data_figures/blood_cadmium/
-    ``` |
-| `education_experiment_section_A1.R`    | Figure A1(a)-(b) for Appendix A1      |  |
-| real_data_section6_3.R      | Real data figures, Tables for Section 6.3 | output/real_data_figures/education_experiment/Figures_1{a,b,c}.png |
+| `sim_section_A3.R`     | Figure A2, Figure A4 for Appendix A3      |  `output/simulation_figures/`   |
+| `education_experiment_section_6.2.R`     | Figure 1(a)-(c), Figure 2(a)-(c) for Section 6.2, Figure A5(a)-(c) for Section 6.2      |    `output/real_data_figures/education_experiment/` |
+| `blood_cadmium_section_6.3.R`    | Figure 3(a)-(c), Figure 4(a)-(c) for Section 6.3      |  `output/real_data_figures/blood_cadmium/` |
+| `education_experiment_section_A1.R`    | Figure A1(a)-(b) for Appendix A1      | `output/real_data_figures/education_experiment/`  |
 
 
 ---
