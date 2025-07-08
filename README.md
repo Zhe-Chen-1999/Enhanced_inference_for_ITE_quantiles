@@ -66,42 +66,15 @@ Each script can be run independently after helper functions are loaded:
 - **`education_experiment_section_6.2`**:
   Real data analysis for evaluating the effectiveness of professional development in Section 6.2.
 - **`blood_cadmium_section_6.3`**:
-  Real data analysis for evaluating the effect of smoking on the blood cadmium level in Section 6.3.
-   **Outputs:**  
-    - Figure 3(a)-(c)  
-    - Figure 4(a)-(c)  
-  Saved in `output/real_data_figures/blood_cadmium/`
-
+  Real data analysis for evaluating the effect of smoking on blood cadmium levels in Section 6.3.
 - **`education_experiment_section_A1`**:
   Code for inference on average treatment effects on a binary outcome in Appendix A1.
 ---
 
-
----
-
-### ✅ Simulation Studies
-
-1. **Appendix A1 - Binary Outcome Inference**
-
-2. **Section 6.1 & Appendix A3 - Simulation Studies**
-
-    ```
-    scripts/simulations/A3_simulation_studies.R
-    ```
-### ✅ Real Data Analyses
-
-3. **Section 6.2 - Evaluating the Effectiveness of Professional Development**
-
-4. **Section 6.3 - Effect of Smoking on Blood Cadmium Levels**
-
-   
-
----
-
-## Expected Outputs
+## Outputs
 
 
-| Script                      | Outputs                              | Output Directory                         |
+| Script                      | Expected Outputs                | Output Directory                         |
 |-----------------------------|--------------------------------------|----------------------------------------|
 | `sim_section_A3.R`     | Figure A2, Figure A4 for Appendix A3      |  `output/simulation_figures/`   |
 | `education_experiment_section_6.2.R`     | Figure 1(a)-(c), Figure 2(a)-(c) for Section 6.2, Figure A5(a)-(c) for Section 6.2      |    `output/real_data_figures/education_experiment/` |
