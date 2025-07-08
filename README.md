@@ -34,7 +34,7 @@ Enhanced_inference_for_ITE_quantiles/
 
 ## Data Sources
 
-Real data analyses use publicly available datasets:
+All datasets used in the analyses are publicly available via R packages:
 
 - Education Experiment Data
 
@@ -45,7 +45,7 @@ data("electric_teachers", package = "RIQITE")
 - Blood Cadmium Data
 
 ```r
-data("cadmium", package = "quantreg")
+data("cadmium", package = "QIoT")
 ```
 ---
 
@@ -78,7 +78,7 @@ Each script can be run independently after helper functions are loaded:
 | Script                      | Manuscript Section | Expected Outputs                | Output Directory                         |
 |-----------------------------|--------------------------------------|----------------------------------------|----------------------------------------|
 | `sim_section_A3.R`     | Appendix A3| Figure A2, A4       |  `output/simulation_figures/`   |
-| `education_experiment_section_6.2.R`     | Section 6.2| Figure 1(a)-(c), Figure 2(a)-(c), Figure A5(a)-(c)      |    `output/real_data_figures/education_experiment/` |
+| `education_experiment_section_6.2.R`     | Section 6.2, Appendix A5.3| Figure 1(a)-(c), Figure 2(a)-(c), Figure A5(a)-(c)      |    `output/real_data_figures/education_experiment/` |
 | `blood_cadmium_section_6.3.R`    | Section 6.3   | Figure 3(a)-(c), Figure 4(a)-(c)     |  `output/real_data_figures/blood_cadmium/` |
 | `education_experiment_section_A1.R`    | Appendix A1 | Figure A1(a)-(b)       | `output/real_data_figures/education_experiment/`  |
 
