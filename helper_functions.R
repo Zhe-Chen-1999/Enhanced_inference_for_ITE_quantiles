@@ -1,15 +1,10 @@
-# This script contains key functions for performing enhanced inference for quantiles of individual treatment effects
-
-# Load required libraries
+################################################################################
+################# Helper functions for ITE quantiles inference #################
+################################################################################
 library(RIQITE)
 library(extraDistr)
 library(dplyr)
 
-################################################################################
-############## Inference for Completely Randomized Experiments #################
-################################################################################
-
-# score function of the ranks
 rank_score <- function( n, method.list = list(name = "Wilcoxon") ){
   
   if ( method.list$name == "DIM" ) {
@@ -27,68 +22,75 @@ rank_score <- function( n, method.list = list(name = "Wilcoxon") ){
     score = score/max(score)
     return(score)
   }
-}
-
-# (1-alpha) simultaneous prediction intervals for effects quantiles among treated or control group.
-ci_lower_quantile_group <- function( Z, Y,  set = "treat", k.vec = NULL, 
-                                     treat.method.list = list(name = "Stephenson", s = 6), 
-                                     control.method.list = list(name = "Stephenson", s = 6), 
-                                     alpha=0.05,  tol = 10^(-3), 
-                                     treat.stat.null = NULL, control.stat.null = NULL ){
-  if(set == "treat"){
-    if(is.null(k.vec)){
-      k.vec = (n-sum(Z)+1):n
-    }
-    ci.treat = RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = sum(1-Z) + k.vec, alternative = "greater", method.list = treat.method.list, alpha = alpha, tol = tol, switch = FALSE, stat.null = treat.stat.null)
-    ci.treat = as.numeric( ci.treat$lower )
-    return(ci.treat)
-  }
   
-  if(set == "control"){
-    if(is.null(k.vec)){
-      k.vec = (n-sum(1-Z)+1):n
-    }
-    ci.control = RIQITE::ci_quantile(Z = 1-Z, Y = -Y, k.vec = sum(Z) + k.vec, alternative = "greater", method.list = control.method.list, alpha = alpha, tol = tol, switch = FALSE, stat.null = control.stat.null)
-    ci.control = as.numeric( ci.control$lower )
-    return(ci.control)
-  }
 }
 
-# (1-alpha) simultaneous confidence/prediction intervals for all effects quantiles among treated, control or all units
-ci_lower_quantile_exp <- function( Z, Y, treat.method.list = list(name = "Stephenson", s = 6), control.method.list = list(name = "Stephenson", s = 6), alpha=0.05,  set = "treat", alpha.ratio.treat = 0.5,  tol = 10^(-3), treat.stat.null = NULL, control.stat.null = NULL ){
+#### (1-alpha) simultaneous confidence/prediction intervals (lower bound) for all effects quantiles among treated, control or all units ####
+ci_lower_quantile_exp <- function( Z, Y, treat.method.list = list(name = "Stephenson", s = 6), control.method.list = list(name = "Stephenson", s = 6),
+                                   score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL, alpha=0.05,  set = "treat", alpha.ratio.treat = 0.5,  tol = 10^(-3) ){
   n = length(Z)
   
   if(set == "treat"){
-    ci.treat = RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = (n-sum(Z)+1):n, alternative = "greater", method.list = treat.method.list, alpha = alpha, tol = tol, switch = FALSE, stat.null = treat.stat.null)
+    ci.treat = RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = (n-sum(Z)+1):n, alternative = "greater", method.list = treat.method.list, score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm, alpha = alpha, tol = tol, switch = FALSE)
     ci.treat = as.numeric( ci.treat$lower )
     return(ci.treat)
   }
   
   if(set == "control"){
-    ci.control = RIQITE::ci_quantile(Z = 1-Z, Y = -Y, k.vec = (n-sum(1-Z)+1):n, alternative = "greater", method.list = control.method.list, alpha = alpha, tol = tol, switch = FALSE, stat.null = control.stat.null)
+    if(is.null(stat.null)){
+      stat.null.control = NULL
+    }else{
+      if(is.null(score)){
+        score = rank_score(n, method.list = control.method.list) #### update later
+      }
+      stat.null.control = sum(score) - stat.null
+    }
+    
+    if(is.null(Z.perm)){
+      Z.perm.control = NULL
+    }else{
+      Z.perm.control = 1 - Z.perm
+    }
+    ci.control = RIQITE::ci_quantile(Z = 1-Z, Y = -Y, k.vec = (n-sum(1-Z)+1):n, alternative = "greater", method.list = control.method.list, score = score, stat.null = stat.null.control, nperm = nperm, Z.perm = Z.perm.control, alpha = alpha, tol = tol, switch = FALSE)
     ci.control = as.numeric( ci.control$lower )
     return(ci.control)
   }
   
   if(set == "all"){
-    ci.treat = RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = (n-sum(Z)+1):n, alternative = "greater", method.list = treat.method.list, alpha = alpha*alpha.ratio.treat, tol = tol, switch = FALSE, stat.null = treat.stat.null)
+    
+    ci.treat = RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = (n-sum(Z)+1):n, alternative = "greater", method.list = treat.method.list, score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm, alpha = alpha*alpha.ratio.treat, tol = tol, switch = FALSE)
     ci.treat = as.numeric( ci.treat$lower )
-
-    ci.control = RIQITE::ci_quantile(Z = 1-Z, Y = -Y, k.vec = (n-sum(1-Z)+1):n, alternative = "greater", method.list = control.method.list, alpha = alpha*(1-alpha.ratio.treat), tol = tol, switch = FALSE, stat.null = control.stat.null)
+    
+    if(is.null(stat.null)){
+      stat.null.control = NULL
+    }else{
+      if(is.null(score)){
+        score = rank_score(n, method.list = control.method.list) #### update later
+      }
+      stat.null.control = sum(score) - stat.null
+    }
+    
+    if(is.null(Z.perm)){
+      Z.perm.control = NULL
+    }else{
+      Z.perm.control = 1 - Z.perm
+    }
+    ci.control = RIQITE::ci_quantile(Z = 1-Z, Y = -Y, k.vec = (n-sum(1-Z)+1):n, alternative = "greater", method.list = control.method.list, score = score, stat.null = stat.null.control, nperm = nperm, Z.perm = Z.perm.control, alpha = alpha*(1-alpha.ratio.treat), tol = tol, switch = FALSE)
     ci.control = as.numeric( ci.control$lower )
     
     ci.all = sort( c(ci.treat, ci.control) )
+    
+    cat("ci.treat:", ci.treat, "\n")
+    cat("ci.control:", ci.control, "\n")
+    
     return( ci.all)
   }
 }
 
-###################################################################
-################ Inference for Finite Population ##################
-###################################################################
+########################## Finite Population Inference #############################
+#### correction term based on multivariate hypergeometric distribution ####
 
-# Compute correction term based on multivariate hypergeometric distribution 
 correct_hypergeom <- function(N = 100, n = 50, K.vec = c(60, 80), kk.vec = c(30, 40), ndraw = 10^4, hg.draw = NULL){
-  
   if( length(K.vec) > 1 ){
     if(is.null(hg.draw)){
       hg.draw = rmvhyper(ndraw, diff( c(0, K.vec, N) ), n)
@@ -107,7 +109,8 @@ correct_hypergeom <- function(N = 100, n = 50, K.vec = c(60, 80), kk.vec = c(30,
   }
 }
 
-# Calculate the correction term Delta using the proposed choice of k'
+## calculate the correction term Delta using the proposed choice of kk.vec (k_prime)
+# Here the input "alpha" is the value of gamma * alpha
 threshold_correct_hypergeom <- function( N = 100, n = 50, K.vec = c(60, 80), alpha = 0.05, ndraw = 10^4, hg.draw = NULL, tol = 10^(-2) ){
   
   if(length(K.vec) > 1){
@@ -117,6 +120,7 @@ threshold_correct_hypergeom <- function( N = 100, n = 50, K.vec = c(60, 80), alp
     }
     
     kappa = NULL
+    
     kappa.lower = 1/length(K.vec)
     kappa.upper = 1
     prob.lower = correct_hypergeom( N = N, n = n, K.vec = K.vec, kk.vec = n-qhyper(1-kappa.lower*alpha, N - K.vec, K.vec, n), hg.draw = hg.draw )
@@ -159,12 +163,12 @@ threshold_correct_hypergeom <- function( N = 100, n = 50, K.vec = c(60, 80), alp
   }
 }
 
-# Generalize sample inference results to larger population
+
+### generalize ####
+
 ci_lower_quantile_gen <- function( Z, Y, N = 2*length(Z), K.vec = ceiling(c(0.6, 0.7, 0.8, 0.9)*N), 
                                    alpha=0.05, gamma = 0.5, ndraw = 10^4, treat.method.list = list(name = "Stephenson", s = 6),
-                                   control.method.list = list(name = "Stephenson", s = 6),  set = "all", alpha.ratio.treat = 0.5,  tol = 10^(-3), 
-                                   treat.stat.null = NULL, control.stat.null = NULL){
-  K.vec = sort(K.vec)
+                                   control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  set = "all", alpha.ratio.treat = 0.5,  tol = 10^(-3) ){
   
   if(set == "all"){
     n.star = length(Z)
@@ -186,54 +190,39 @@ ci_lower_quantile_gen <- function( Z, Y, N = 2*length(Z), K.vec = ceiling(c(0.6,
     step1 = list(prob = 0, kk.vec = K.vec)
   }
   
-  kk.vec = step1$kk.vec[ step1$kk.vec > 0 ]
+  step2 = ci_lower_quantile_exp( Z, Y, treat.method.list = treat.method.list, control.method.list = control.method.list, 
+                                 score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm, 
+                                 alpha= alpha - step1$prob,  set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol )
+  step2 = c(-Inf, step2) # add lower confidence limit "-Inf" for case kk.vec = 0
   
-  if(length(kk.vec) > 0){
-    if(set=="all"){
-      step2 = ci_lower_quantile_exp( Z, Y, treat.method.list = treat.method.list, control.method.list = control.method.list,  alpha= alpha - step1$prob,  set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol, treat.stat.null = treat.stat.null, control.stat.null = control.stat.null )
-      ci = step2[kk.vec]
-    }
-    
-    if(set=="treat" | set == "control"){
-      # step2 = ci_lower_quantile_exp( Z, Y, treat.method.list = treat.method.list, control.method.list = control.method.list,  alpha= alpha - step1$prob,  set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol, treat.stat.null = treat.stat.null, control.stat.null = control.stat.null )
-      ci = ci_lower_quantile_group( Z, Y,  set = set, k.vec = kk.vec, 
-                                    treat.method.list = treat.method.list, 
-                                    control.method.list = control.method.list,
-                                    alpha=alpha - step1$prob,  tol = tol, 
-                                    treat.stat.null = treat.stat.null, control.stat.null = control.stat.null )
-    }
-    ci = c( rep(-Inf, sum(step1$kk.vec == 0)), ci )
-  }else{
-    ci = rep(-Inf, length(step1$kk.vec))
-  }
+  ci = step2[step1$kk.vec+1] # index +1 for case kk.vec = 0
   
+  K.vec = sort(K.vec)
   conf.int = data.frame(k = K.vec, k_prime = step1$kk.vec, lower = ci, upper = Inf)
   return(conf.int)
 }
 
-# Specify the Type of Inference: individual/simultaneous
+# specify individual/simultaneous inference
 ci_lower_quantile_generalize <- function(Z, Y, N, k_vec = ceiling(c(0.6, 0.7, 0.8, 0.9)*N), 
                                          alpha=0.05, gamma = 0.5, ndraw = 10^4, 
-                                         treat.method.list = list(name = "Stephenson", s = 6), control.method.list = list(name = "Stephenson", s = 6), set = "all", alpha.ratio.treat = 0.5, tol = 10^(-3), simul = TRUE){
+                                         treat.method.list = list(name = "Stephenson", s = 6), control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  
+                                         set = "all", alpha.ratio.treat = 0.5, tol = 10^(-3), simul = TRUE){
   
   k_vec = sort(k_vec)
   if (simul) {
     res = ci_lower_quantile_gen( Z = Z, Y = Y, N = N, K.vec = k_vec, 
                                  alpha = alpha, gamma = gamma, ndraw = ndraw, 
-                                 treat.method.list = treat.method.list, control.method.list = control.method.list, set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol )
+                                 treat.method.list = treat.method.list, control.method.list = control.method.list, score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm,
+                                 set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol )
   }
   else {
     res = NULL
-    treat.stat.null = RIQITE::null_dist(n=length(Z), m = sum(Z), method.list = treat.method.list)
-    control.stat.null = RIQITE::null_dist(n=length(Z), m = sum(1-Z), method.list = control.method.list)
-    
     for (k in k_vec){
       res = rbind(res, 
                   ci_lower_quantile_gen( Z = Z, Y = Y, N = N, K.vec = c(k), 
                                          alpha = alpha, gamma = gamma, ndraw = ndraw, 
-                                         treat.method.list = treat.method.list, control.method.list = control.method.list, 
-                                         set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol, 
-                                         treat.stat.null = treat.stat.null, control.stat.null = control.stat.null))
+                                         treat.method.list = treat.method.list, control.method.list = control.method.list, score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm,
+                                         set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol))
     }
   }
   return(res)
@@ -242,22 +231,22 @@ ci_lower_quantile_generalize <- function(Z, Y, N, k_vec = ceiling(c(0.6, 0.7, 0.
 ################################################################################
 #################  Methods to be compared for finite population ################
 ################################################################################
-# Standard Output Format for All Methods:
-# - The output is a data frame with J rows (number of testing quantiles) and 3 columns.
-# - Columns:
-#   1. Quantile index (k)  
-#   2. Lower confidence limit  
-#   3. Upper confidence limit  
-
 # M0: Method in Caughey et al. (2023) 
-method_caughey <- function(Z, Y, k_vec, method.list = list(name = "Wilcoxon"), nperm = 10^4,  alpha = 0.05, switch = FALSE){
+# M1: Method combining treated and control using Bonferroni correction (apply M0 twice)
+# M2: Method using Berger and Boos (1994)'s approach
+
+## The standard output for all methods: 
+## J (number of testing quantiles) rows and three columns. Three columns are k, lower, and upper
+################################################################################
+# M0: Method in Caughey et al. (2023) 
+method_caughey <- function(Z, Y, k_vec, method.list = list(name = "Wilcoxon"), nperm = 10^4,  alpha = 0.05){
   return(RIQITE::ci_quantile(Z = Z, Y = Y, k.vec = k_vec,
                              alternative = "greater", 
                              method.list = method.list,
-                             nperm = nperm,  alpha = alpha, switch = switch))
+                             nperm = nperm,  alpha = alpha, switch = FALSE))
 }
-
-# M1: combining the inference for treated and control using Bonferroni correction 
+################################################################################
+# M1: Method combining treated and control using Bonferroni correction (apply M0 twice)
 method_combine <- function(Z, Y, N, k_vec, 
                            control.method.list = list(name = "Stephenson", s = 6), 
                            treat.method.list = list(name = "Stephenson", s = 6),
@@ -267,35 +256,46 @@ method_combine <- function(Z, Y, N, k_vec,
   
   return(ci_lower_quantile_generalize(Z = Z, Y = Y, N = N, k_vec = k_vec, simul = simul,
                                       alpha = alpha, gamma = gamma, ndraw = ndraw, control.method.list = control.method.list,
-                                      treat.method.list = treat.method.list, 
+                                      treat.method.list = treat.method.list, score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm,
                                       set = "all", alpha.ratio.treat = alpha.ratio.treat, tol = tol))
 }
 
-# M2: Berger and Boos (1994)'s approach
+## example
+
+# method_combine( Z, Y, N = length(Z), k_vec = ceiling(c(0.6, 0.7, 0.8, 0.9)*N),simul = TRUE) 
+################################################################################
+# M2: Method using Berger and Boos (1994)'s approach
 method_bergerboos <- function(Z, Y, N, k_vec, 
                               treat.method.list = list(name = "Stephenson", s = 6), 
                               control.method.list = list(name = "Stephenson", s = 6),
-                              simul = TRUE,  
+                              simul = TRUE, stat.null = NULL, score = NULL, Z.perm = NULL, 
                               alpha=0.05, gamma = 0.5, alpha.ratio.treat = 0.5, 
-                              ndraw = 10^5, tol = 10^(-3)
-                              ){
+                              ndraw = 10^5, nperm = 10^4, tol = 10^(-3)){
   
   ci.gen1 = ci_lower_quantile_generalize(Z, Y, N, k_vec, treat.method.list = treat.method.list, 
-                                        set = "treat", simul = simul,
-                                         alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat, tol = tol)
+                                         stat.null = stat.null, set = "treat", simul = simul,
+                                         alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat, 
+                                         score = score, Z.perm = Z.perm,
+                                         ndraw = ndraw, nperm = nperm, tol = tol)
   
   ci.gen2 = ci_lower_quantile_generalize(Z, Y, N, k_vec, control.method.list = control.method.list, 
-                                         set = "control", simul = simul,
-                                         alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat,  tol = tol)
+                                         stat.null = stat.null, set = "control", simul = simul,
+                                         alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat, 
+                                         score = score, Z.perm = Z.perm,
+                                         ndraw = ndraw, nperm = nperm, tol = tol)
   return(pmax( ci.gen1, ci.gen2 ))
 }
 
+## example
 
-################################################################################
-####################### Inference for Super Population  ########################
-################################################################################
+# method_bergerboos( Z, Y, N = length(Z), k_vec = ceiling(c(0.6, 0.7, 0.8, 0.9)*N), simul = FALSE,
+#                   method.list = list(name = "Stephenson", s = 6), stat.null = stat.null)
 
-# Compute the correction term based on the multinomial distribution
+###################################################################################
+
+
+########################## Super Population Inference #############################
+#### correction term based on multinomial distribution ####
 correct_multinomial <- function( n = 50, Beta.vec = c(0.6, 0.8), kk.vec = c(30, 40), ndraw = 10^4, mn.draw = NULL ){
   if( length(Beta.vec) > 1 ){
     if(is.null(mn.draw)){
@@ -315,7 +315,7 @@ correct_multinomial <- function( n = 50, Beta.vec = c(0.6, 0.8), kk.vec = c(30, 
   }
 }
 
-# Calculate the correction term using the proposed choice of k'
+## calculate the correction term Delta using the proposed choice of kk.vec (k_prime)
 threshold_correct_multinomial <- function(n = 50, Beta.vec = c(0.6, 0.8), alpha = 0.05, ndraw = 10^4, mn.draw = NULL, tol = 10^(-3) ){
   
   if(length(Beta.vec) > 1){
@@ -368,7 +368,7 @@ threshold_correct_multinomial <- function(n = 50, Beta.vec = c(0.6, 0.8), alpha 
   }
 }
 
-# Generalize sample inference results to larger population
+### generalize ####
 ci_lower_quantile_gen_SP <- function( Z, Y, Beta.vec = c(0.5, 0.6, 0.7, 0.8, 0.9), 
                                       alpha=0.05, gamma = 0.5, ndraw = 10^5, treat.method.list = list(name = "Stephenson", s = 6),
                                       control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  set = "all", alpha.ratio.treat = 0.5,  tol = 10^(-3) ){
@@ -391,13 +391,15 @@ ci_lower_quantile_gen_SP <- function( Z, Y, Beta.vec = c(0.5, 0.6, 0.7, 0.8, 0.9
                                  score = score, stat.null = stat.null, nperm = nperm, Z.perm = Z.perm, 
                                  alpha= alpha - step1$prob,  set = set, alpha.ratio.treat = alpha.ratio.treat,  tol = tol )
   step2 = c(-Inf, step2) 
+  
   ci = step2[step1$kk.vec+1]
+  
   Beta.vec = sort(Beta.vec)
   conf.int = data.frame(beta = Beta.vec, lower = ci, upper = Inf)
   return(conf.int)
 }
 
-# Specify the Type of Inference: individual/simultaneous
+# specify individual/simultaneous inference
 ci_lower_quantile_generalize_SP <- function( Z, Y, beta_vec = c(0.5, 0.6, 0.7, 0.8, 0.9), 
                                              alpha=0.05, gamma = 0.5, ndraw = 10^4, treat.method.list = list(name = "Stephenson", s = 6),
                                              control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  set = "all", alpha.ratio.treat = 0.5,  tol = 10^(-3), simul = TRUE ){
@@ -422,21 +424,20 @@ ci_lower_quantile_generalize_SP <- function( Z, Y, beta_vec = c(0.5, 0.6, 0.7, 0
   return(res)
 }
 
-# Inferential Method for Super Population using Berger and Boos (1994)'s approach
-
-### combine results using treated and control units separately ###
+############### Inferential Method for Super Population (M2: using Berger and Boos (1994)'s approach) ######################################
+### combine results using treated (* = 1) and control units (* = 0) separately ###
 SP_method_combine_star1_and_star0 <- function(Z, Y, beta_vec = c(0.5, 0.6, 0.7, 0.8, 0.9), 
                                               alpha=0.05, gamma = 0.5, ndraw = 10^5, treat.method.list = list(name = "Stephenson", s = 6),
                                               control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  
                                               alpha.ratio.treat = 0.5,  tol = 10^(-3), simul = TRUE ){
-  ## using treated units 
+  ## using treated units (* = 1)
   ci.gen1 = ci_lower_quantile_generalize_SP(Z, Y, beta_vec, treat.method.list = treat.method.list, control.method.list = control.method.list,
                                             stat.null = stat.null, set = "treat", simul = simul,
                                             alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat, 
                                             score = score, Z.perm = Z.perm,
                                             ndraw = ndraw, nperm = nperm, tol = tol)
   
-  ## using control units 
+  ## using control units (* = 0)
   ci.gen2 = ci_lower_quantile_generalize_SP(Z, Y, beta_vec, treat.method.list = treat.method.list, control.method.list = control.method.list,
                                             stat.null = stat.null, set = "control", simul = simul,
                                             alpha=alpha/2, gamma = gamma, alpha.ratio.treat = alpha.ratio.treat, 
@@ -445,7 +446,7 @@ SP_method_combine_star1_and_star0 <- function(Z, Y, beta_vec = c(0.5, 0.6, 0.7, 
   return(pmax( ci.gen1, ci.gen2 ))
 }
 
-#### using all experimental units ####
+#### using all experimental units (* = empty) ####
 SP_method_star_empty <- function(Z, Y, beta_vec = c(0.5, 0.6, 0.7, 0.8, 0.9), 
                                  alpha=0.05, gamma = 0.5, ndraw = 10^5, treat.method.list = list(name = "Stephenson", s = 6),
                                  control.method.list = list(name = "Stephenson", s = 6), score = NULL, stat.null = NULL, nperm = 10^4, Z.perm = NULL,  
@@ -459,13 +460,12 @@ SP_method_star_empty <- function(Z, Y, beta_vec = c(0.5, 0.6, 0.7, 0.8, 0.9),
   return(ci.empty)
 }
 
-################################################################################
 #################### Helper functions for simulation ###########################
-################################################################################
+### Data generating process ###
 
-# Simulate data generating process:
-# - Y0 ~ N(0, rho^2): Potential outcome under control  
-# - Y1 ~ N(0, 1 - rho^2): Potential outcome under treatment  
+# Y0 ~ N(0, rho^2), Y1 ~ N(0, 1-rho^2)
+# The total variance of Y1 and Y0 is 1
+# So that the results for different rho^2 may be more comparable
 
 simulate_dt_mixture <- function(N, n, k, rho, mu = 2){
   
@@ -495,45 +495,35 @@ simulate_dt_mixture <- function(N, n, k, rho, mu = 2){
   return(list(dt_N, dt_n))
 }
 
-# Function to compare different inferential methods for ITE quantiles
+## example
+# dt = simulate_dt_mixture(100, 50, 0.5, 0.2)
+# dt[1]: population data Nx3
+# dt[2]: sample data nx5
+
+### Function to compare different inferential methods for ITE quantiles ###                                                                       
 compare <- function(dt, k_vec, simul = FALSE, alpha=0.05){
   
   N = dim(dt[[1]])[1]
+  
   Z = dt[[2]]$Z
   Y_obs = dt[[2]]$Y_obs
+  
+  # J is length of k_vec
   J = length(k_vec)
   
   # Method M0 is the same for simul = TRUE or FALSE
-  m0_wilcox = method_caughey(Z, Y_obs, k_vec = k_vec, method.list = list(name = "Wilcoxon"), alpha=alpha)
-  m0_s4 = method_caughey(Z, Y_obs, k_vec = k_vec, method.list = list(name = "Stephenson", s = 4), alpha=alpha)
   m0_s6 = method_caughey(Z, Y_obs, k_vec = k_vec, method.list = list(name = "Stephenson", s = 6), alpha=alpha)
-  m0_s10 = method_caughey(Z, Y_obs, k_vec = k_vec, method.list = list(name = "Stephenson", s = 10), alpha=alpha)
   
   # Method M1 depends on simul if N!=n
-  m1_wilcox = method_combine(Z, Y_obs, N = N, method.list = list(name = "Wilcoxon"), k_vec = k_vec, simul = simul, alpha=alpha)
-  m1_s4 = method_combine(Z, Y_obs, N = N, method.list = list(name = "Stephenson", s = 4), k_vec = k_vec, simul = simul, alpha=alpha)
   m1_s6 = method_combine(Z, Y_obs, N = N,  k_vec = k_vec, simul = simul, alpha=alpha)
-  m1_s10 = method_combine(Z, Y_obs, N = N, method.list = list(name = "Stephenson", s = 10), k_vec = k_vec, simul = simul, alpha=alpha)
   
   # Method M2 depends on simul
-  m2_wilcox = method_bergerboos(Z, Y_obs, N = N, k_vec = k_vec, method.list = list(name = "Wilcoxon"), simul = simul, alpha=alpha)
-  m2_s4 = method_bergerboos(Z, Y_obs, N = N, k_vec = k_vec, method.list = list(name = "Stephenson", s = 4), simul = simul, alpha=alpha)
   m2_s6 = method_bergerboos(Z, Y_obs, N = N, k_vec = k_vec,  simul = simul, alpha=alpha)
-  m2_s10 = method_bergerboos(Z, Y_obs, N = N, k_vec = k_vec, method.list = list(name = "Stephenson", s = 10), simul = simul, alpha=alpha)
-  
+ 
   res = rbind(m0_s6, m1_s6, m2_s6)
   
-  res$method = c(#rep('M0-Wilcox', J),
-    rep('M0-S4', J),
-    rep('M0-S6', J),
-    rep('M0-S10', J),
-    rep('M1-Wilcox', J),
-    rep('M1-S4', J),
-    rep('M1-S6', J),
-    rep('M1-S10', J),
-    rep('M2-Wilcox', J),
-    rep('M2-S4', J),
-    rep('M2-S6', J),
-    rep('M2-S10', J))
+  res$method = c(rep('M0-S6', J),
+                 rep('M1-S6', J),
+                 rep('M2-S6', J)))
   return(res)
 }
