@@ -80,9 +80,6 @@ ci_lower_quantile_exp <- function( Z, Y, treat.method.list = list(name = "Stephe
     
     ci.all = sort( c(ci.treat, ci.control) )
     
-    cat("ci.treat:", ci.treat, "\n")
-    cat("ci.control:", ci.control, "\n")
-    
     return( ci.all)
   }
 }
