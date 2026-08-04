@@ -521,6 +521,6 @@ compare <- function(dt, k_vec, simul = FALSE, alpha=0.05){
   
   res$method = c(rep('M0-S6', J),
                  rep('M1-S6', J),
-                 rep('M2-S6', J)))
+                 rep('M2-S6', J))
   return(res)
 }
